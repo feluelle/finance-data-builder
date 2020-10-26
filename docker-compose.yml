@@ -1,0 +1,56 @@
+x-airflow-environment: &airflow-environment
+  env_file: airflow.env
+  image: feluelle/fdb_airflow:latest
+x-airflow-volumes: &airflow-volumes
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./storage:/opt/storage
+    - ./dbt:/opt/dbt
+
+version: '3.8'
+services:
+  fdb-dbt-db:
+    image: library/postgres:latest
+    container_name: fdb_dbt_db
+    env_file: postgres.dbt.env
+    ports:
+      - 55432:5432
+  fdb-airflow-db:
+    image: library/postgres:latest
+    container_name: fdb_airflow_db
+    env_file: postgres.airflow.env
+    ports:
+      - 55433:5432
+    restart: always
+  fdb-airflow-db-init:
+    <<: *airflow-environment
+    build: .
+    container_name: fdb_airflow_db_init
+    command: db upgrade
+    depends_on:
+      - fdb-airflow-db
+  fdb-airflow-users-init:
+    <<: *airflow-environment
+    container_name: fdb_airflow_users_init
+    command: users create --role Admin --username airflow --email airflow@apache.org --firstname Airflow --lastname Apache --password airflow
+    depends_on:
+      - fdb-airflow-db-init
+  fdb-airflow-webserver:
+    <<: *airflow-environment
+    container_name: fdb_airflow_webserver
+    command: webserver
+    ports:
+      - 58080:8080
+    <<: *airflow-volumes
+    depends_on:
+      - fdb-airflow-db-init
+    restart: always
+  fdb-airflow-scheduler:
+    <<: *airflow-environment
+    container_name: fdb_airflow_scheduler
+    command: scheduler
+    <<: *airflow-volumes
+    depends_on:
+      - fdb-airflow-db-init
+    restart: always
