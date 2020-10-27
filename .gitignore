@@ -128,10 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Manually added
 .idea
 airflow/logs
 storage/*
 !storage/.gitkeep
 airflow.env
-postgres.airflow.env
-postgres.dbt.env
