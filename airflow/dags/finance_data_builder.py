@@ -84,7 +84,12 @@ with DAG(dag_id='finance_data_builder', start_date=datetime(2020, 1, 1)) as dag:
         )
 
 
-    tasks_load = []
+    task_transform = BashOperator(
+        bash_command='source /opt/dbt-env/bin/activate && '
+                     'dbt run --project-dir /opt/dbt/finance-data-builder --profile-dir /opt/dbt',
+        task_concurrency=1,
+        task_id='transform_finance_data'
+    )
     for ticker in ['msft', 'aapl', 'goog']:
         task_extract = PythonOperator(
             python_callable=extract_finance_data,
@@ -97,12 +102,4 @@ with DAG(dag_id='finance_data_builder', start_date=datetime(2020, 1, 1)) as dag:
             op_kwargs=dict(file=task_extract.output),
             task_id=f'load_finance_data_{ticker}'
         )
-        task_extract >> task_load
-        tasks_load.append(task_load)
-    task_transform = BashOperator(
-        bash_command='source /opt/dbt-env/bin/activate && '
-                     'dbt run --project-dir /opt/dbt/finance-data-builder --profile-dir /opt/dbt',
-        task_concurrency=1,
-        task_id='transform_finance_data'
-    )
-    tasks_load >> task_transform
+        task_extract >> task_load >> task_transform
