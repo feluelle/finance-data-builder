@@ -67,6 +67,7 @@ with DAG(dag_id='yahoo_daily', start_date=datetime(2020, 1, 1)) as dag:
             start=ds,
             end=next_ds,
             interval='60m',
+            actions=True,
             progress=False
         )
         if data_frame.empty:
