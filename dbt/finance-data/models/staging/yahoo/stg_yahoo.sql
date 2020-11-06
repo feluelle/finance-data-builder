@@ -11,6 +11,15 @@ with stg_yahoo as (
            "Dividends"::double precision as dividends,
            "Stock Splits"::int as stock_splits
     from {{ source('yahoo', 'src_yahoo') }}
+    -- filter out null rows
+    where not (
+      "Open" is null and
+      "High" is null and
+      "Low" is null and
+      "Close" is null and
+      "Adj Close" is null and
+      "Volume" is null
+    )
 
 )
 
