@@ -6,6 +6,7 @@ import yfinance as yf
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.bash import BashOperator
+from airflow.operators.latest_only import LatestOnlyOperator
 from airflow.operators.python import PythonOperator
 from pendulum import datetime
 from sqlalchemy import create_engine
@@ -55,7 +56,7 @@ def _psql_insert_copy(table, conn, keys, data_iter):
         cur.copy_expert(sql=sql, file=s_buf)
 
 
-with DAG(dag_id='yahoo_daily', start_date=datetime(2020, 1, 1)) as dag:
+with DAG(dag_id='yahoo_daily', start_date=datetime(2019, 1, 1), schedule_interval='0 0 * * 1-5') as dag:
     def extract_finance_data(ticker: str, ds: str, next_ds: str, **kwargs: dict) -> str:
         directory, file = f'{LOCAL_STORAGE}/yahoo/{ticker}', f'{ds}.csv'
         # Create directory in case it does not already exist
@@ -101,7 +102,9 @@ with DAG(dag_id='yahoo_daily', start_date=datetime(2020, 1, 1)) as dag:
             index=False
         )
 
-
+    task_latest_only = LatestOnlyOperator(
+        task_id='latest_only'
+    )
     task_transform = BashOperator(
         bash_command='source /opt/dbt-env/bin/activate && '
                      'dbt run --project-dir /opt/dbt/finance-data --profiles-dir /opt/dbt',
@@ -114,7 +117,7 @@ with DAG(dag_id='yahoo_daily', start_date=datetime(2020, 1, 1)) as dag:
         task_concurrency=1,
         task_id='test_finance_data'
     )
-    for ticker in ['msft', 'aapl', 'goog']:
+    for ticker in ['msft', 'aapl', 'goog', 'amzn', 'fb', 'baba', 'tsla', 'wmt', 'nvda', 'unh']:
         task_extract = PythonOperator(
             python_callable=extract_finance_data,
             op_args=[ticker],
@@ -126,4 +129,4 @@ with DAG(dag_id='yahoo_daily', start_date=datetime(2020, 1, 1)) as dag:
             op_kwargs=dict(file=task_extract.output),
             task_id=f'load_finance_data_{ticker}'
         )
-        task_extract >> task_load >> task_transform >> task_test
+        task_extract >> task_load >> task_latest_only >> task_transform >> task_test
