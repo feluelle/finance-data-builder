@@ -1,5 +1,5 @@
-import os
 from os import getenv
+from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
@@ -10,6 +10,7 @@ from airflow.operators.python import PythonOperator
 from pendulum import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
+from sqlalchemy.types import VARCHAR
 
 LOCAL_STORAGE = getenv('LOCAL_STORAGE', '/tmp')
 DBT_POSTGRES_USER = getenv('DBT_POSTGRES_USER')
@@ -54,30 +55,47 @@ def _psql_insert_copy(table, conn, keys, data_iter):
         cur.copy_expert(sql=sql, file=s_buf)
 
 
-with DAG(dag_id='finance_data_builder', start_date=datetime(2020, 1, 1)) as dag:
+with DAG(dag_id='yahoo_daily', start_date=datetime(2020, 1, 1)) as dag:
     def extract_finance_data(ticker: str, ds: str, next_ds: str, **kwargs: dict) -> str:
-        directory, file = f'{LOCAL_STORAGE}/{ticker}', f'{ds}.csv'
-        data_frame = yf.download(ticker, start=ds, end=next_ds, interval='1h')
+        directory, file = f'{LOCAL_STORAGE}/yahoo/{ticker}', f'{ds}.csv'
+        # Create directory in case it does not already exist
+        path = Path(directory)
+        path.mkdir(parents=True, exist_ok=True)
+        # Download data
+        data_frame = yf.download(
+            tickers=ticker,
+            start=ds,
+            end=next_ds,
+            interval='60m',
+            actions=True,
+            prepost=True
+        )
         if data_frame.empty:
             raise AirflowSkipException('No data available!')
-        if not os.path.exists(directory):
-            os.mkdir(directory)
-        full_path = os.path.join(directory, file)
+        # Write data to storage in csv format
+        full_path = path.joinpath(file)
         data_frame.to_csv(path_or_buf=full_path)
         return full_path
 
 
     def load_finance_data(ticker: str, file: str) -> None:
+        # Read data from storage
         data_frame = pd.read_csv(file)
+        # Add meta data
+        data_frame['Ticker'] = ticker
+        # Load data into db
         data_frame.to_sql(
-            name=f'src_{ticker}',
+            name='src_yahoo',
+            schema='yahoo',
+            dtype=VARCHAR,
             if_exists='append',
             con=create_engine(URL(
                 username=DBT_POSTGRES_USER,
                 password=DBT_POSTGRES_PASSWORD,
                 host=DBT_POSTGRES_HOST,
                 port=DBT_POSTGRES_PORT,
-                database=DBT_POSTGRES_DB
+                database=DBT_POSTGRES_DB,
+                drivername='postgres'
             )),
             method=_psql_insert_copy,
             index=False
@@ -86,9 +104,15 @@ with DAG(dag_id='finance_data_builder', start_date=datetime(2020, 1, 1)) as dag:
 
     task_transform = BashOperator(
         bash_command='source /opt/dbt-env/bin/activate && '
-                     'dbt run --project-dir /opt/dbt/finance-data-builder --profile-dir /opt/dbt',
+                     'dbt run --project-dir /opt/dbt/finance-data --profiles-dir /opt/dbt',
         task_concurrency=1,
         task_id='transform_finance_data'
+    )
+    task_test = BashOperator(
+        bash_command='source /opt/dbt-env/bin/activate && '
+                     'dbt test --project-dir /opt/dbt/finance-data --profiles-dir /opt/dbt',
+        task_concurrency=1,
+        task_id='test_finance_data'
     )
     for ticker in ['msft', 'aapl', 'goog']:
         task_extract = PythonOperator(
@@ -102,4 +126,4 @@ with DAG(dag_id='finance_data_builder', start_date=datetime(2020, 1, 1)) as dag:
             op_kwargs=dict(file=task_extract.output),
             task_id=f'load_finance_data_{ticker}'
         )
-        task_extract >> task_load >> task_transform
+        task_extract >> task_load >> task_transform >> task_test

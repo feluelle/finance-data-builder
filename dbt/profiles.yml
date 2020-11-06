@@ -2,13 +2,13 @@
 # For more information on how to configure this file, please see:
 # https://docs.getdbt.com/docs/profile
 
-finance-data-builder:
+finance-data:
   outputs:
     dev:
       type: postgres
       threads: 1
       host: "{{ env_var('DBT_POSTGRES_HOST') }}"
-      port: "{{ env_var('DBT_POSTGRES_PORT') }}"
+      port: "{{ env_var('DBT_POSTGRES_PORT') | int }}"
       user: "{{ env_var('DBT_POSTGRES_USER') }}"
       pass: "{{ env_var('DBT_POSTGRES_PASSWORD') }}"
       dbname: "{{ env_var('DBT_POSTGRES_DB') }}"

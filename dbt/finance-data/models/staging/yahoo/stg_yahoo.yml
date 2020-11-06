@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: stg_yahoo
+    description: "Performs basic operations like cleaning or renaming columns"
+    columns:
+      - name: ticker
+        tests:
+          - not_null
+      - name: datetime
+        tests:
+          - not_null
+      - name: open
+      - name: high
+      - name: low
+      - name: close
+      - name: adj_close
+      - name: volume
+      - name: dividends
+      - name: stock_splits
+    tests:
+      - unique:
+          column_name: "ticker || '-' || datetime"
