@@ -1,7 +1,7 @@
 x-airflow-environment: &airflow-environment
-  env_file: airflow.env
   environment:
-    - AIRFLOW__WEBSERVER__COOKIE_SAMESITE=Lax
+    - AIRFLOW_INTERNAL_USER
+    - AIRFLOW_INTERNAL_PASSWORD
     - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}
     - DBT_POSTGRES_USER
     - DBT_POSTGRES_PASSWORD
@@ -47,7 +47,7 @@ services:
   fdb-airflow-users-init:
     <<: *airflow-environment
     container_name: fdb_airflow_users_init
-    command: users create --role Admin --username airflow --email airflow@apache.org --firstname Airflow --lastname Apache --password airflow
+    command: users create --role Admin --username ${AIRFLOW_USER} --email airflow@apache.org --firstname Airflow --lastname Apache --password ${AIRFLOW_PASSWORD}
     depends_on:
       - fdb-airflow-db-init
   fdb-airflow-webserver:

@@ -133,4 +133,3 @@ dmypy.json
 airflow/logs
 storage/*
 !storage/.gitkeep
-airflow.env
