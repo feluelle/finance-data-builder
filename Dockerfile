@@ -1,10 +1,11 @@
-FROM apache/airflow:2.0.0b3-python3.8
-
-USER root
+FROM apache/airflow:2.0.0-python3.8
 
 # Additional requirements for Airflow
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
+COPY ./airflow/dags ${AIRFLOW__CORE__DAGS_FOLDER}
+
+USER root
 
 # DBT Installation from https://docs.getdbt.com/dbt-cli/installation/#installation
 ## Requirements for DBT
@@ -15,9 +16,16 @@ RUN apt-get update \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-## DBT installed in a Python Virtual Environment
+## Create virtual environment for DBT
 RUN python3 -m venv /opt/dbt-env \
-    && source /opt/dbt-env/bin/activate \
-    && pip install dbt
+    && chown airflow -R /opt/dbt-env
 
 USER airflow
+
+## DBT installed in a Python Virtual Environment
+ENV DBT_DIR /opt/dbt
+ENV DBT_PROFILES_DIR ${DBT_DIR}
+COPY --chown=airflow ./dbt ${DBT_DIR}
+RUN source /opt/dbt-env/bin/activate \
+    && pip install dbt \
+    && dbt deps --project-dir ${DBT_DIR}/finance-data
