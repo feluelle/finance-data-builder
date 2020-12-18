@@ -76,7 +76,7 @@ with DAG(dag_id='yahoo_daily', start_date=datetime(2019, 1, 1), schedule_interva
         # Write data to storage in csv format
         full_path = path.joinpath(file)
         data_frame.to_csv(path_or_buf=full_path)
-        return full_path
+        return str(full_path)
 
 
     def load_finance_data(ticker: str, file: str) -> None:
