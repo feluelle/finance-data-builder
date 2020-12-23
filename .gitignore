@@ -133,3 +133,4 @@ dmypy.json
 airflow/logs
 storage/*
 !storage/.gitkeep
+dbt/.user.yml

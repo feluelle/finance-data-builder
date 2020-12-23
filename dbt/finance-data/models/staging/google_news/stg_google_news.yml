@@ -1,24 +1,22 @@
 version: 2
 
 models:
-  - name: stg_yahoo
+  - name: stg_google_news
     description: "Performs basic operations like cleaning or renaming columns"
     columns:
       - name: id
         tests:
           - not_null
           - unique
-      - name: ticker
+      - name: title
         tests:
           - not_null
-      - name: datetime
+      - name: link
         tests:
           - not_null
-      - name: open
-      - name: high
-      - name: low
-      - name: close
-      - name: adj_close
-      - name: volume
-      - name: dividends
-      - name: stock_splits
+      - name: published_at
+        tests:
+          - not_null
+      - name: company
+        tests:
+          - not_null

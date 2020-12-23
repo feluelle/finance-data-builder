@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: google_news
+    schema: google_news
+    tables:
+      - name: src_google_news

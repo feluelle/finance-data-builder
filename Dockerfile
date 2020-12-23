@@ -3,7 +3,7 @@ FROM apache/airflow:2.0.0-python3.8
 # Additional requirements for Airflow
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
-COPY ./airflow/dags ${AIRFLOW__CORE__DAGS_FOLDER}
+COPY ./airflow/dags ${AIRFLOW_HOME}/dags
 
 USER root
 

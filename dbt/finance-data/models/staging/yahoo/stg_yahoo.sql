@@ -7,9 +7,9 @@ with stg_yahoo as (
            "Low"::double precision as low,
            "Close"::double precision as "close",
            "Adj Close"::double precision as adj_close,
-           "Volume"::int as volume,
+           "Volume"::numeric::integer as volume,
            "Dividends"::double precision as dividends,
-           "Stock Splits"::int as stock_splits
+           "Stock Splits"::numeric::integer as stock_splits
     from {{ source('yahoo', 'src_yahoo') }}
     -- filter out null rows
     where not (
@@ -22,6 +22,7 @@ with stg_yahoo as (
     )
 
 )
-
-select *
+-- TODO: Check if distinct is really necessary
+select distinct {{ dbt_utils.surrogate_key(['ticker', 'datetime']) }} as id,
+                *
 from stg_yahoo

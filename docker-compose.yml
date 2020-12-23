@@ -2,12 +2,20 @@ x-airflow-environment: &airflow-environment
   environment:
     - AIRFLOW_USER
     - AIRFLOW_PASSWORD
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
     - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}
+    - AIRFLOW__CORE__STORE_SERIALIZED_DAGS=True
+    - AIRFLOW__CORE__STORE_DAG_CODE=True
     - DBT_POSTGRES_USER
     - DBT_POSTGRES_PASSWORD
     - DBT_POSTGRES_DB
     - DBT_POSTGRES_HOST
     - DBT_POSTGRES_PORT
+    - LOCAL_STORAGE=/opt/storage
+    # The following configurations work for docker resource limit of 12gb and 6cpu's (adjust it accordingly)
+    - AIRFLOW__CORE__PARALLELISM=64
+    - AIRFLOW__CORE__DAG_CONCURRENCY=64
+    - AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG=64
   image: feluelle/fdb_airflow:latest
 x-airflow-volumes: &airflow-volumes
   volumes:
@@ -41,15 +49,16 @@ services:
     <<: *airflow-environment
     build: .
     container_name: fdb_airflow_db_init
-    command: db upgrade
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - airflow users list || (
+          airflow db upgrade &&
+          airflow users create --role Admin --username ${AIRFLOW_USER} --email airflow@apache.org --firstname Airflow --lastname Apache --password ${AIRFLOW_PASSWORD}
+        )
+    restart: on-failure
     depends_on:
       - fdb-airflow-db
-  fdb-airflow-users-init:
-    <<: *airflow-environment
-    container_name: fdb_airflow_users_init
-    command: users create --role Admin --username ${AIRFLOW_USER} --email airflow@apache.org --firstname Airflow --lastname Apache --password ${AIRFLOW_PASSWORD}
-    depends_on:
-      - fdb-airflow-db-init
   fdb-airflow-webserver:
     <<: *airflow-environment
     container_name: fdb_airflow_webserver
