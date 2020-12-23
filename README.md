@@ -7,12 +7,34 @@ The data sources are:
 * [yahoo! finance](https://finance.yahoo.com/)
 * [Google News](https://news.google.com/)
 
-## Prerequisites
+## What it is
+
+### Airflow
+
+I use Airflow to load data into the database:
+
+From **Google News**:
+
+![airflow graph google news](images/airflow_graph__google_news.png "Airflow Graph - Google News")
+
+From **yahoo! finance**:
+
+![airflow graph yahoo](images/airflow_graph__yahoo.png "Airflow Graph - Yahoo")
+
+### DBT
+
+I use DBT to transform the data into models:
+
+![dbt graph](images/dbt_graph.png "DBT Graph")
+
+## Get started
+
+### Prerequisites
 
 - docker
 - docker-compose
 
-## Setup
+### Setup
 
 To run this project, simply add a `.env` file to the project root directory, fill it with the following environment 
 variables:
@@ -37,7 +59,7 @@ and then run it via `docker-compose`:
 docker-compose up -d
 ```
 
-## Notes
+### Notes
 
 I am using a `storage` folder for storing data files locally. Normally you probably want the storage to be a remote 
 storage that is designed to store large amount of data, such as S3, GCP or Blob Storage.
