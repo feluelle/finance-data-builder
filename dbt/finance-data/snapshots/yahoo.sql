@@ -2,10 +2,12 @@
 
 {{
     config(
-      unique_key="ticker || '-' || datetime",
+      unique_key="_dbt_id",
     )
 }}
 
-select * from {{ source('yahoo', 'src_yahoo') }}
+select {{ dbt_utils.surrogate_key(['"Ticker"', '"Datetime"']) }} as _dbt_id,
+       *
+from {{ source('yahoo', 'src_yahoo') }}
 
 {% endsnapshot %}

@@ -1,7 +1,11 @@
 # finance-data-builder
 
-The finance data builder extracts data from the yahoo finance API, loads it into a postgres database and transforms it 
+The finance data builder extracts data from several sources, loads it into a postgres database and transforms it 
 via dbt into beautiful models.
+
+The data sources are:
+* [yahoo! finance](https://finance.yahoo.com/)
+* [Google News](https://news.google.com/)
 
 ## Prerequisites
 

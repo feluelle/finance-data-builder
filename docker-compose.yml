@@ -64,7 +64,8 @@ services:
     container_name: fdb_airflow_webserver
     command: webserver
     ports:
-      - 58080:8080
+      - 58080:8080  # airflow webserver
+      - 58081:8081  # dbt docs serve
     <<: *airflow-volumes
     depends_on:
       - fdb-airflow-db-init

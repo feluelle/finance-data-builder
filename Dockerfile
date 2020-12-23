@@ -29,3 +29,5 @@ COPY --chown=airflow ./dbt ${DBT_DIR}
 RUN source /opt/dbt-env/bin/activate \
     && pip install dbt \
     && dbt deps --project-dir ${DBT_DIR}/finance-data
+# Expose additional port for dbt docs serve
+EXPOSE 8081
