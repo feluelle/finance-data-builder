@@ -1,4 +1,4 @@
-with stg_yahoo as (
+with stg_yahoo_finance as (
 
     select "Ticker"::varchar as ticker,
            "Datetime"::timestamp as datetime,
@@ -10,7 +10,7 @@ with stg_yahoo as (
            "Volume"::numeric::integer as volume,
            "Dividends"::double precision as dividends,
            "Stock Splits"::numeric::integer as stock_splits
-    from {{ source('yahoo', 'src_yahoo') }}
+    from {{ source('yahoo', 'src_yahoo_finance') }}
     -- filter out null rows
     where not (
       "Open" is null and
@@ -25,4 +25,4 @@ with stg_yahoo as (
 -- TODO: Check if distinct is really necessary
 select distinct {{ dbt_utils.surrogate_key(['ticker', 'datetime']) }} as id,
                 *
-from stg_yahoo
+from stg_yahoo_finance

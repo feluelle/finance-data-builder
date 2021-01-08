@@ -1,4 +1,4 @@
-{% snapshot yahoo_snapshot %}
+{% snapshot yahoo_finance_snapshot %}
 
 {{
     config(
@@ -8,6 +8,6 @@
 
 select {{ dbt_utils.surrogate_key(['"Ticker"', '"Datetime"']) }} as _dbt_id,
        *
-from {{ source('yahoo', 'src_yahoo') }}
+from {{ source('yahoo', 'src_yahoo_finance') }}
 
 {% endsnapshot %}

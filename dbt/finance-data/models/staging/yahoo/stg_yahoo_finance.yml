@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: stg_yahoo
+  - name: stg_yahoo_finance
     description: "Performs basic operations like cleaning or renaming columns"
     columns:
       - name: id

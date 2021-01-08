@@ -8,6 +8,6 @@
 
 select {{ dbt_utils.surrogate_key(['title', 'link', 'published', '"Company"']) }} as _dbt_id,
        *
-from {{ source('google_news', 'src_google_news') }}
+from {{ source('google', 'src_google_news') }}
 
 {% endsnapshot %}

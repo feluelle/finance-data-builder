@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: google_news
-    schema: google_news
+  - name: google
+    schema: google
     tables:
       - name: src_google_news

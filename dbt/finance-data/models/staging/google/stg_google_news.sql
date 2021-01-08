@@ -4,7 +4,7 @@ with stg_google_news as (
            link,
            "published"::date as published_at,
            "Company" as company
-    from {{ source('google_news', 'src_google_news') }}
+    from {{ source('google', 'src_google_news') }}
 
 )
 -- TODO: Check if distinct is really necessary

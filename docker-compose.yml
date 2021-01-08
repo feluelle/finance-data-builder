@@ -2,6 +2,7 @@ x-airflow-environment: &airflow-environment
   environment:
     - AIRFLOW_USER
     - AIRFLOW_PASSWORD
+    - AIRFLOW__CORE__FERNET_KEY=_vlbm4VJwSvCYuBSHlOGPqDQyWkgrSp47P8ou6zP0zY=
     - AIRFLOW__CORE__EXECUTOR=LocalExecutor
     - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}
     - AIRFLOW__CORE__STORE_SERIALIZED_DAGS=True
@@ -35,6 +36,7 @@ services:
       - POSTGRES_DB=${DBT_POSTGRES_DB}
     ports:
       - 55432:${DBT_POSTGRES_PORT}
+    restart: always
   fdb-airflow-db:
     image: library/postgres:latest
     container_name: ${AIRFLOW_POSTGRES_HOST}

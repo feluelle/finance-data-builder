@@ -4,4 +4,4 @@ sources:
   - name: yahoo
     schema: yahoo
     tables:
-      - name: src_yahoo
+      - name: src_yahoo_finance

@@ -38,6 +38,12 @@ models:
       enabled: false
     staging:
       materialized: view
+      google:
+        schema: google
+      paypal:
+        schema: paypal
+      yahoo:
+        schema: yahoo
 
 snapshots:
   target_schema: snapshots

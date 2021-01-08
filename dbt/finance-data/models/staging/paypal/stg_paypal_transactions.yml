@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: stg_paypal_transactions
+    description: "Performs basic operations like cleaning or renaming columns"
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
+      - name: account_number
+        tests:
+          - not_null
+      - name: start_date
+        tests:
+          - not_null
+      - name: end_date
+        tests:
+          - not_null
+      - name: last_refreshed_datetime
+        tests:
+          - not_null
+      - name: paypal_account_id
+      - name: transaction_id
+        tests:
+          - not_null
+          - unique
+      - name: paypal_reference_id
+      - name: paypal_reference_id_type
+      - name: transaction_initiation_date
+        tests:
+          - not_null
+      - name: transaction_updated_date
+        tests:
+          - not_null
+      - name: transaction_amount__currency_code
+        tests:
+          - not_null
+      - name: transaction_amount__value
+        tests:
+          - not_null
+      - name: transaction_status
+        tests:
+          - not_null
+      - name: ending_balance__currency_code
+        tests:
+          - not_null
+      - name: ending_balance__value
+        tests:
+          - not_null
+      - name: available_balance__currency_code
+        tests:
+          - not_null
+      - name: available_balance__value
+        tests:
+          - not_null
+      - name: invoice_id
+      - name: protection_eligibility
+        tests:
+          - not_null
