@@ -67,6 +67,18 @@ and then run it via `docker-compose`:
 docker-compose up -d
 ```
 
+**NOTE:** To retrieve PayPal data you must authenticate. First create a 
+[PayPal App](https://developer.paypal.com/developer/applications/) with _LIVE APP SETTINGS_ _Transaction Search_ enabled
+and then add an Airflow connection with the following information:
+```
+Conn Id: http_paypal
+Conn Type: HTTP
+Host: https://api.paypal.com
+Login: <enter-your-CLIENT-ID-here>
+Password: <enter-your-SECRET-here>
+```
+You should then be able to retrieve your personal PayPal transactions.
+
 ### Notes
 
 I am using a `storage` folder for storing data files locally. Normally you probably want the storage to be a remote 
