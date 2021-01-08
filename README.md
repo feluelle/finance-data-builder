@@ -1,29 +1,37 @@
 # finance-data-builder
 
-The finance data builder extracts data from several sources, loads it into a postgres database and transforms it 
-via dbt into beautiful models.
+> Finance 🏦 Data Builder 🛠️ @ postgres 🐘
+
+The finance data builder **extracts** data from several sources, **loads** it into a postgres database and 
+**transforms** it via dbt into beautiful models.
 
 The data sources are:
 * [yahoo! finance](https://finance.yahoo.com/)
 * [Google News](https://news.google.com/)
+* [PayPal](https://www.paypal.com/)
+    * [transactions](https://developer.paypal.com/docs/api/transaction-search/v1/)
 
 ## What it is
 
 ### Airflow
 
-I use Airflow to load data into the database:
+I use [Airflow](http://airflow.apache.org/) to **manage** the whole **ELT** process:
 
-From **Google News**:
+For **Google News**:
 
 ![airflow graph google news](images/airflow_graph__google_news.png "Airflow Graph - Google News")
 
-From **yahoo! finance**:
+For **yahoo! finance**:
 
 ![airflow graph yahoo](images/airflow_graph__yahoo.png "Airflow Graph - Yahoo")
 
+For **PayPal**:
+
+![airflow graph paypal](images/airflow_graph__paypal.png "Airflow Graph - PayPal")
+
 ### DBT
 
-I use DBT to transform the data into models:
+I use [DBT](https://www.getdbt.com/) to **transform** the data into **models**:
 
 ![dbt graph](images/dbt_graph.png "DBT Graph")
 
@@ -31,8 +39,8 @@ I use DBT to transform the data into models:
 
 ### Prerequisites
 
-- docker
-- docker-compose
+- [docker](https://www.docker.com/)
+- [docker-compose](https://docs.docker.com/compose/)
 
 ### Setup
 
