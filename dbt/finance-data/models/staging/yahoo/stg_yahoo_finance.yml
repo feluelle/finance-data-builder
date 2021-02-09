@@ -4,13 +4,10 @@ models:
   - name: stg_yahoo_finance
     description: "Performs basic operations like cleaning or renaming columns"
     columns:
-      - name: id
+      - name: uid
         tests:
           - not_null
           - unique
-      - name: ticker
-        tests:
-          - not_null
       - name: datetime
         tests:
           - not_null
@@ -22,3 +19,6 @@ models:
       - name: volume
       - name: dividends
       - name: stock_splits
+      - name: _ticker
+        tests:
+          - not_null

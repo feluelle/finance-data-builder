@@ -2,6 +2,21 @@ version: 2
 
 sources:
   - name: google
+    freshness:
+      warn_after:
+        count: 1
+        period: day
+    loaded_at_field: "_loaded_at::timestamp"
     schema: google
     tables:
       - name: src_google_news
+        description: "Contains data from news.google.com"
+        columns:
+          - name: VALUE
+            description: "The raw google news data"
+            tests:
+              - not_null
+          - name: _loaded_at
+            description: "When the data was loaded into the database"
+            tests:
+              - not_null

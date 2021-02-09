@@ -4,6 +4,7 @@ FROM apache/airflow:2.0.0-python3.8
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 COPY ./airflow/dags ${AIRFLOW_HOME}/dags
+COPY ./airflow/plugins ${AIRFLOW_HOME}/plugins
 
 USER root
 

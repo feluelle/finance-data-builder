@@ -2,6 +2,25 @@ version: 2
 
 sources:
   - name: yahoo
+    freshness:
+      warn_after:
+        count: 1
+        period: day
+    loaded_at_field: "_loaded_at::timestamp"
     schema: yahoo
     tables:
       - name: src_yahoo_finance
+        description: "Contains data from yahoo! finance transactions"
+        columns:
+          - name: VALUE
+            description: "The raw paypal transactions"
+            tests:
+              - not_null
+          - name: _ticker
+            description: "The name of the ticker the data was requested for"
+            tests:
+              - not_null
+          - name: _loaded_at
+            description: "When the data was loaded into the database"
+            tests:
+              - not_null

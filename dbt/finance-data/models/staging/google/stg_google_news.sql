@@ -1,13 +1,17 @@
-with stg_google_news as (
+with pre__stg_google_news as (
 
-    select title,
-           link,
-           "published"::date as published_at,
-           "Company" as company
+    select "VALUE"::jsonb as json_value
     from {{ source('google', 'src_google_news') }}
 
+), stg_google_news as (
+
+    select {{ dbt_utils.surrogate_key(['json_value']) }} as uid,
+           json_value -> 'feed' as feed,
+           json_value -> 'entries' as entries,
+           now() as _loaded_at
+    from pre__stg_google_news
+
 )
--- TODO: Check if distinct is really necessary
-select distinct {{ dbt_utils.surrogate_key(['title', 'link', 'published_at', 'company']) }} as id,
-                *
+
+select *
 from stg_google_news

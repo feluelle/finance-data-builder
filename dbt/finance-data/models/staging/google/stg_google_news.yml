@@ -4,19 +4,92 @@ models:
   - name: stg_google_news
     description: "Performs basic operations like cleaning or renaming columns"
     columns:
-      - name: id
+      - name: uid
+        description: "An unique identifier across news posts"
+        tests:
+          - not_null
+          - unique
+      - name: feed
+        description: "The rss feed details"
+        tests:
+          - not_null
+      - name: entries
+        description: "The news entries"
+        tests:
+          - not_null
+      - name: _loaded_at
+        description: "When the data was loaded into the database"
+        tests:
+          - not_null
+  - name: stg_google_news__entries
+    description: "Performs basic operations like cleaning or renaming columns"
+    columns:
+      - name: uid
+        description: "An unique identifier across news posts"
         tests:
           - not_null
           - unique
       - name: title
+        description: "The news title"
         tests:
           - not_null
+      - name: title_detail
+      - name: links
       - name: link
+        description: "The news link"
         tests:
           - not_null
-      - name: published_at
+      - name: id
+      - name: guidislink
+      - name: published
+        description: "The news published date"
         tests:
           - not_null
-      - name: company
+      - name: published_parsed
+      - name: summary
+      - name: summary_detail
+      - name: source
+        description: "The source i.e. main page of the news"
+        tests:
+          - not_null
+      - name: sub_articles
+        description: "Contains references to sub articles"
+        tests:
+          - not_null
+      - name: _loaded_at
+        description: "When the data was loaded into the database"
+        tests:
+          - not_null
+  - name: stg_google_news__feed
+    description: "Performs basic operations like cleaning or renaming columns"
+    columns:
+      - name: uid
+        description: "An unique identifier across news posts"
+        tests:
+          - not_null
+          - unique
+      - name: generator_detail
+      - name: generator
+      - name: title
+      - name: title_detail
+      - name: links
+      - name: link
+        description: "The link to the rss feed (e.g. contains the query to filter the news posts)"
+        tests:
+          - not_null
+      - name: language
+        description: "The language of this news post"
+      - name: publisher
+        description: "The publisher of the rss feed"
+      - name: publisher_detail
+        description: "Contains publisher details (e.g. email)"
+      - name: rights
+      - name: rights_detail
+      - name: updated
+      - name: updated_parsed
+      - name: subtitle
+      - name: subtitle_detail
+      - name: _loaded_at
+        description: "When the data was loaded into the database"
         tests:
           - not_null

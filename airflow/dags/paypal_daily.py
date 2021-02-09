@@ -1,5 +1,3 @@
-import json
-
 import pandas as pd
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -8,9 +6,14 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from pendulum import datetime
 
-from plugins.utils import load_df_into_db
+from utils import load_df_into_db
 
-with DAG(dag_id='paypal_daily', start_date=datetime(2019, 1, 1), schedule_interval='@daily') as dag:
+with DAG(
+        dag_id='paypal_daily',
+        start_date=datetime(2019, 1, 1),
+        schedule_interval='@daily',
+        tags=['transactions', 'rest-api', 'private', 'elt']
+) as dag:
     task_extract_transactions = SimpleHttpOperator(
         endpoint='/v1/reporting/transactions',
         method='GET',
@@ -28,16 +31,16 @@ with DAG(dag_id='paypal_daily', start_date=datetime(2019, 1, 1), schedule_interv
 
     def load_transactions(data: str) -> None:
         # Read data from xcom
-        data_dict = json.loads(data)
-        # Remove api meta data (only needed for paging)
-        del data_dict['page']
-        del data_dict['total_items']
-        del data_dict['total_pages']
-        del data_dict['links']
-        # Load data into dataframe
-        data_frame = pd.DataFrame(data=data_dict)
+        paypal_transactions = data
         # Load data into db
-        load_df_into_db(data_frame, schema='paypal', table='src_paypal_transactions')
+        load_df_into_db(
+            data_frame=pd.DataFrame({
+                'VALUE': [paypal_transactions],
+                '_loaded_at': pd.Timestamp.now()
+            }),
+            schema='paypal',
+            table='src_paypal_transactions'
+        )
 
 
     task_load_transactions = PythonOperator(
@@ -52,13 +55,13 @@ with DAG(dag_id='paypal_daily', start_date=datetime(2019, 1, 1), schedule_interv
     )
     task_transform = BashOperator(
         bash_command='source /opt/dbt-env/bin/activate && '
-                     'dbt run --project-dir /opt/dbt/finance-data --models staging.paypal+',
+                     'dbt run --project-dir ${DBT_DIR}/finance-data --models staging.paypal+',
         task_concurrency=1,
         task_id='transform_paypal_data'
     )
     task_test = BashOperator(
         bash_command='source /opt/dbt-env/bin/activate && '
-                     'dbt test --project-dir /opt/dbt/finance-data --models staging.paypal+',
+                     'dbt test --project-dir ${DBT_DIR}/finance-data --models staging.paypal+',
         task_concurrency=1,
         task_id='test_paypal_data'
     )

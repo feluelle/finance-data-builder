@@ -2,11 +2,11 @@
 
 {{
     config(
-      unique_key="_dbt_id",
+      unique_key="uid",
     )
 }}
 
-select {{ dbt_utils.surrogate_key(['transaction_details']) }} as _dbt_id,
+select {{ dbt_utils.surrogate_key(['"VALUE"']) }} as uid,
        *
 from {{ source('paypal', 'src_paypal_transactions') }}
 

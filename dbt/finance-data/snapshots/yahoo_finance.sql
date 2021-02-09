@@ -2,11 +2,11 @@
 
 {{
     config(
-      unique_key="_dbt_id",
+      unique_key="uid",
     )
 }}
 
-select {{ dbt_utils.surrogate_key(['"Ticker"', '"Datetime"']) }} as _dbt_id,
+select {{ dbt_utils.surrogate_key(['"VALUE"', '_ticker']) }} as uid,
        *
 from {{ source('yahoo', 'src_yahoo_finance') }}
 

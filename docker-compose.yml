@@ -21,6 +21,7 @@ x-airflow-environment: &airflow-environment
 x-airflow-volumes: &airflow-volumes
   volumes:
     - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/plugins:/opt/airflow/plugins
     - ./airflow/logs:/opt/airflow/logs
     - ./storage:/opt/storage
     - ./dbt:/opt/dbt
@@ -55,8 +56,8 @@ services:
     command:
       - -c
       - airflow users list || (
-          airflow db upgrade &&
-          airflow users create --role Admin --username ${AIRFLOW_USER} --email airflow@apache.org --firstname Airflow --lastname Apache --password ${AIRFLOW_PASSWORD}
+        airflow db upgrade &&
+        airflow users create --role Admin --username ${AIRFLOW_USER} --email airflow@apache.org --firstname Airflow --lastname Apache --password ${AIRFLOW_PASSWORD}
         )
     restart: on-failure
     depends_on:
