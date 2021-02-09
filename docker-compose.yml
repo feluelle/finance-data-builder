@@ -7,6 +7,10 @@ x-airflow-environment: &airflow-environment
     - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}
     - AIRFLOW__CORE__STORE_SERIALIZED_DAGS=True
     - AIRFLOW__CORE__STORE_DAG_CODE=True
+    - AIRFLOW__METRICS__STATSD_ON=True
+    - AIRFLOW__METRICS__STATSD_HOST=fdb_airflow_statsd_exporter
+    - AIRFLOW__METRICS__STATSD_PORT=8125
+    - AIRFLOW__METRICS__STATSD_PREFIX=airflow
     - DBT_POSTGRES_USER
     - DBT_POSTGRES_PASSWORD
     - DBT_POSTGRES_DB
@@ -69,6 +73,7 @@ services:
     ports:
       - 58080:8080  # airflow webserver
       - 58081:8081  # dbt docs serve
+      - 58125:8125  # airflow statsd metrics
     <<: *airflow-volumes
     depends_on:
       - fdb-airflow-db-init
@@ -80,4 +85,59 @@ services:
     <<: *airflow-volumes
     depends_on:
       - fdb-airflow-db-init
+    restart: always
+  fdb-prometheus:
+    image: prom/prometheus
+    container_name: fdb_prometheus
+    ports:
+      - 59090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+  fdb-dbt-db-exporter:
+    image: wrouesnel/postgres_exporter
+    container_name: fdb_dbt_db_exporter
+    ports:
+      - 59187:9187
+    environment:
+      - DATA_SOURCE_NAME="postgresql://${DBT_POSTGRES_USER}:${DBT_POSTGRES_PASSWORD}@${DBT_POSTGRES_HOST}:${DBT_POSTGRES_PORT}/${DBT_POSTGRES_DB}?sslmode=disable"
+    restart: always
+  fdb-airflow-db-exporter:
+    image: wrouesnel/postgres_exporter
+    container_name: fdb_airflow_db_exporter
+    ports:
+      - 59188:9187
+    environment:
+      - DATA_SOURCE_NAME="postgresql://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}?sslmode=disable"
+    restart: always
+  fdb-node-exporter:
+    image: prom/node-exporter
+    container_name: fdb_node_exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - 59100:9100
+    restart: always
+  fdb-airflow-statsd-exporter:
+    image: apache/airflow:airflow-statsd-exporter-2020.09.05-v0.17.0
+    container_name: fdb_airflow_statsd_exporter
+    command: "--statsd.listen-udp=:8125 --web.listen-address=:9102"
+    ports:
+      - 59102:9102
+      - 58125:8125/udp
+    restart: always
+  fdb-grafana:
+    image: grafana/grafana
+    container_name: fdb_grafana
+    ports:
+      - 53000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
     restart: always

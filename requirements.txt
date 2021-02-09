@@ -1,2 +1,3 @@
 yfinance
 pygooglenews
+statsd>=3.3.0, <4.0
