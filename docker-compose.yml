@@ -100,7 +100,7 @@ services:
     ports:
       - 59187:9187
     environment:
-      - DATA_SOURCE_NAME=postgresql://${DBT_POSTGRES_USER}:${DBT_POSTGRES_PASSWORD}@${DBT_POSTGRES_HOST}:${DBT_POSTGRES_PORT}/${DBT_POSTGRES_DB}
+      - DATA_SOURCE_NAME=postgresql://${DBT_POSTGRES_USER}:${DBT_POSTGRES_PASSWORD}@${DBT_POSTGRES_HOST}:${DBT_POSTGRES_PORT}/${DBT_POSTGRES_DB}?sslmode=disable
     restart: unless-stopped
   fdb-airflow-db-exporter:
     image: wrouesnel/postgres_exporter:latest
@@ -108,7 +108,7 @@ services:
     ports:
       - 59188:9187
     environment:
-      - DATA_SOURCE_NAME=postgresql://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}
+      - DATA_SOURCE_NAME=postgresql://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_POSTGRES_HOST}:${AIRFLOW_POSTGRES_PORT}/${AIRFLOW_POSTGRES_DB}?sslmode=disable
     restart: unless-stopped
   fdb-node-exporter:
     image: prom/node-exporter:latest
