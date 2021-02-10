@@ -134,3 +134,5 @@ airflow/logs
 storage/*
 !storage/.gitkeep
 dbt/.user.yml
+grafana/*
+!grafana/.gitkeep
